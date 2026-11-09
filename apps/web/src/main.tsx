@@ -2,6 +2,7 @@ import '@erp/tokens/tokens.css';
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useTenant } from './hooks/useTenant';
+import { DevBanner } from './components/DevBanner';
 import { EnrollmentsView } from './views/EnrollmentsView';
 import { LedgerView } from './views/LedgerView';
 import { AuditView } from './views/AuditView';
@@ -20,7 +21,9 @@ function App() {
   const [tab, setTab] = useState<Tab>('enrollments');
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: 'var(--space-6)' }}>
+    <div>
+      <DevBanner />
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: 'var(--space-6)' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
         <h1 style={{ margin: 0, fontSize: 20, color: 'var(--brand-navy)' }}>ERP Platform</h1>
         <label htmlFor="tenant-select" style={{ marginLeft: 'auto', color: 'var(--text-secondary)' }}>
@@ -58,6 +61,7 @@ function App() {
         {tab === 'ledger' && <LedgerView />}
         {tab === 'audit' && <AuditView />}
       </main>
+      </div>
     </div>
   );
 }
