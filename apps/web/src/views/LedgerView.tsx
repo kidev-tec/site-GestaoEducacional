@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { postV1LedgerEntries } from '../api-client/client';
 import { ApiError } from '../api-client/client';
 import { useLedgerBalance } from '../hooks/useData';
-import { formatBRL, humanError } from '../lib/domain';
+import { formatBRL, humanError, parseReaisToCents } from '../lib/domain';
 
 export function LedgerView() {
   const { state, reload } = useLedgerBalance();
@@ -13,15 +13,10 @@ export function LedgerView() {
 
   async function handlePost(e: React.FormEvent) {
     e.preventDefault();
-    // client insere centavos INTEIROS a partir de R$ digitado (nunca float na conta)
-    const reais = Number(amount.replace(',', '.'));
-    if (!Number.isFinite(reais)) {
-      setFeedback({ kind: 'error', text: 'Valor inválido.' });
-      return;
-    }
-    const cents = Math.round(reais * 100);
-    if (!Number.isInteger(cents) || cents <= 0) {
-      setFeedback({ kind: 'error', text: 'Valor deve ser positivo (mínimo R$ 0,01).' });
+    // parser estrito: recusa >2 casas, sinal, notação científica — nunca arredonda (RF-014)
+    const cents = parseReaisToCents(amount);
+    if (cents === null) {
+      setFeedback({ kind: 'error', text: 'Valor inválido. Use até 2 casas decimais (ex.: 150,00). Valores devem ser positivos.' });
       return;
     }
     setBusy(true);

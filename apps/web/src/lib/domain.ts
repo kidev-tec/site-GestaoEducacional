@@ -35,6 +35,21 @@ export function formatBRL(cents: number): string {
   return formatter.format(cents / 100);
 }
 
+/**
+ * Converte valor em R$ digitado para centavos inteiros (RF-014).
+ * Estrito: no máximo 2 casas decimais; qualquer outro formato é RECUSADO
+ * (nunca arredonda silenciosamente — finding HIGH do review G6a).
+ * Retorna null quando inválido.
+ */
+export function parseReaisToCents(input: string): number | null {
+  const trimmed = input.trim();
+  if (!/^\d{1,13}(,\d{1,2})?$/.test(trimmed)) return null;
+  const [reais, cents = ''] = trimmed.split(',');
+  const centsPadded = (cents + '00').slice(0, 2);
+  const value = Number(reais) * 100 + Number(centsPadded);
+  return Number.isSafeInteger(value) && value > 0 ? value : null;
+}
+
 /** Mensagem humana para erros da API (RF-016). */
 export function humanError(status: number, fallback: string): string {
   if (status === 409) return 'Esta chave de idempotência já foi usada com dados diferentes. Gere uma nova solicitação.';

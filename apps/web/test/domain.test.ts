@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canTransition, stateLabel, formatBRL, humanError, TRANSITIONS } from '../src/lib/domain';
+import { canTransition, stateLabel, formatBRL, humanError, parseReaisToCents, TRANSITIONS } from '../src/lib/domain';
 
 describe('transições (espelho do servidor p/ desabilitar botão)', () => {
   it('DRAFT só avança para PENDING_DOCUMENTS entre os "next" da UI', () => {
@@ -38,6 +38,31 @@ describe('formatBRL (centavos inteiros → R$ pt-BR)', () => {
   it('rejeita float — regra financeira do client (RF-014)', () => {
     expect(() => formatBRL(10.5)).toThrow(/inteiros/);
     expect(() => formatBRL(0.1 + 0.2)).toThrow(/inteiros/);
+  });
+});
+
+describe('parseReaisToCents (RF-014 estrito — finding HIGH review G6a)', () => {
+  it('converte formatos válidos', () => {
+    expect(parseReaisToCents('150,00')).toBe(15000);
+    expect(parseReaisToCents('0,01')).toBe(1);
+    expect(parseReaisToCents('10,5')).toBe(1050);
+    expect(parseReaisToCents('1000')).toBe(100000);
+    expect(parseReaisToCents(' 1.999,99'.replace('.', ''))).toBe(199999); // sem separador de milhar sujo
+  });
+
+  it('RECUSA centavos fracionários sem arredondar', () => {
+    expect(parseReaisToCents('0,001')).toBeNull(); // arredondaria p/ 0
+    expect(parseReaisToCents('1,999')).toBeNull(); // arredondaria p/ 200
+  });
+
+  it('RECUSA negativos, sinais, vazio, lixo e zero', () => {
+    expect(parseReaisToCents('-2,50')).toBeNull();
+    expect(parseReaisToCents('+3')).toBeNull();
+    expect(parseReaisToCents('')).toBeNull();
+    expect(parseReaisToCents('abc')).toBeNull();
+    expect(parseReaisToCents('1e5')).toBeNull();
+    expect(parseReaisToCents('0,00')).toBeNull();
+    expect(parseReaisToCents('0')).toBeNull();
   });
 });
 
