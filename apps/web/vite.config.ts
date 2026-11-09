@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: './', // relativo: necessário para file:// no Electron (G6b)
   plugins: [react()],
   test: {
     environment: 'jsdom',
