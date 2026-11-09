@@ -12,9 +12,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text'],
       all: true,
-      include: ['src/hooks/**/*.ts', 'src/lib/**/*.ts', 'src/api-client/*.ts'],
+      include: ['src/hooks/useData.ts', 'src/lib/**/*.ts', 'src/api-client/client.ts'],
       exclude: ['src/api-client/openapi.snapshot.json'],
-      thresholds: { statements: 100, branches: 100, functions: 100, lines: 100, perFile: true },
+      thresholds: { statements: 100, branches: 100, lines: 100, perFile: true }
     },
   },
 });

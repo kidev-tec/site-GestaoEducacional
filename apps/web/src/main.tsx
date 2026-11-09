@@ -6,12 +6,14 @@ import { DevBanner } from './components/DevBanner';
 import { EnrollmentsView } from './views/EnrollmentsView';
 import { LedgerView } from './views/LedgerView';
 import { AuditView } from './views/AuditView';
+import { PeopleView } from './views/PeopleView';
 import { TENANTS } from './lib/domain';
 
-type Tab = 'enrollments' | 'ledger' | 'audit';
+type Tab = 'enrollments' | 'people' | 'ledger' | 'audit';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'enrollments', label: 'Matrículas' },
+  { id: 'people', label: 'Pessoas' },
   { id: 'ledger', label: 'Ledger' },
   { id: 'audit', label: 'Auditoria' },
 ];
@@ -58,6 +60,7 @@ function App() {
 
       <main>
         {tab === 'enrollments' && <EnrollmentsView />}
+        {tab === 'people' && <PeopleView />}
         {tab === 'ledger' && <LedgerView />}
         {tab === 'audit' && <AuditView />}
       </main>

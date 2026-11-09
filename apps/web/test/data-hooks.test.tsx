@@ -37,7 +37,7 @@ describe('hooks dados OpenAPI', () => {
     await screen.findByText(/Transição de estado inválida/);
   });
 
-  it('tenant escolhido alimenta o header x-tenant-id das requisições reais', async () => {
+  it('sessão escolhida alimenta o header Authorization das requisições reais (tenant vem do token, não do header)', async () => {
     const { TenantProbe } = await import('./helpers.js');
     const userEvent = (await import('@testing-library/user-event')).default;
     const fetchMock = vi.fn().mockResolvedValue({
@@ -47,11 +47,14 @@ describe('hooks dados OpenAPI', () => {
       json: vi.fn().mockResolvedValue({ balanceCents: 0 }),
     });
     vi.stubGlobal('fetch', fetchMock);
+    client.configureApi({ getAccessToken: () => 'sess-B' });
     render(<TenantProbe />);
     await userEvent.click(screen.getByText('toB'));
     await client.getV1LedgerBalance();
     const init = fetchMock.mock.calls[0]![1] as { headers: Record<string, string> };
-    expect(init.headers['x-tenant-id']).toBe('B');
+    expect(init.headers.authorization).toBe('Bearer sess-B');
+    expect(init.headers['x-tenant-id']).toBeUndefined();
+    client.configureApi({ getAccessToken: () => '' });
     vi.unstubAllGlobals();
   });
 });

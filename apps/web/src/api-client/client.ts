@@ -3,11 +3,13 @@
 export interface ApiConfig {
   baseUrl: string;
   getTenantId: () => string;
+  getAccessToken: () => string;
 }
 
 let config: ApiConfig = {
   baseUrl: import.meta.env?.VITE_API_URL ?? 'http://localhost:3000',
   getTenantId: () => localStorage.getItem('erp-tenant') ?? '',
+  getAccessToken: () => localStorage.getItem('erp-access-token') ?? '',
 };
 
 export function configureApi(cfg: Partial<ApiConfig>): void {
@@ -31,7 +33,7 @@ async function request<T>(method: string, path: string, opts: { body?: unknown; 
     method,
     headers: {
       'content-type': 'application/json',
-      'x-tenant-id': config.getTenantId(),
+      ...(config.getAccessToken() ? { authorization: `Bearer ${config.getAccessToken()}` } : {}),
       ...opts.headers,
     },
     ...(opts.body !== undefined ? { body: JSON.stringify(opts.body) } : {}),
@@ -41,8 +43,28 @@ async function request<T>(method: string, path: string, opts: { body?: unknown; 
   return body as T;
 }
 
+export function getReady(): Promise<unknown> {
+  return request<unknown>('GET', '/ready');
+}
+
 export function getHealth(): Promise<unknown> {
   return request<unknown>('GET', '/health');
+}
+
+export function postV1AuthRegister(body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/auth/register', { body });
+}
+
+export function postV1AuthLogin(body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/auth/login', { body });
+}
+
+export function postV1AuthLogout(body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/auth/logout', { body });
+}
+
+export function getV1AuthMe(): Promise<unknown> {
+  return request<unknown>('GET', '/v1/auth/me');
 }
 
 export function getOpenapiJson(): Promise<unknown> {
@@ -71,4 +93,36 @@ export function getV1LedgerBalance(): Promise<unknown> {
 
 export function getV1AuditCount(): Promise<unknown> {
   return request<unknown>('GET', '/v1/audit/count');
+}
+
+export function postV1Units(body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/units', { body });
+}
+
+export function getV1Units(): Promise<unknown> {
+  return request<unknown>('GET', '/v1/units');
+}
+
+export function postV1People(body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/people', { body });
+}
+
+export function getV1People(): Promise<unknown> {
+  return request<unknown>('GET', '/v1/people');
+}
+
+export function getV1PeopleId(id: string): Promise<unknown> {
+  return request<unknown>('GET', '/v1/people/{id}', { headers: { id: id } });
+}
+
+export function patchV1PeopleId(id: string, body: unknown): Promise<unknown> {
+  return request<unknown>('PATCH', '/v1/people/{id}', { body, headers: { id: id } });
+}
+
+export function postV1PeopleIdGuardians(id: string, body: unknown): Promise<unknown> {
+  return request<unknown>('POST', '/v1/people/{id}/guardians', { body, headers: { id: id } });
+}
+
+export function getV1PeopleIdGuardians(id: string): Promise<unknown> {
+  return request<unknown>('GET', '/v1/people/{id}/guardians', { headers: { id: id } });
 }
