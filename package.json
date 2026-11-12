@@ -2,7 +2,8 @@
   "name": "erp-gestao-educacional-site",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "test": "npm test --workspaces --if-present",
