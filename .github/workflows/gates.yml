@@ -1,0 +1,30 @@
+name: gates
+on:
+  push:
+    branches: [main, staging-local, 'feat/**']
+  pull_request:
+    branches: [main, staging-local]
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - name: Typecheck + build (tsc --noEmit && vite build)
+        run: npm --prefix apps/web run build
+      - name: Unit + coverage @100×4
+        run: npm test
+      - name: Coverage summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: apps/web/coverage/coverage-summary.json
+          if-no-files-found: ignore
+          retention-days: 7
